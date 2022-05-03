@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div>
+        <img src="{{ player.image.url }}">
+        <p>Imie i nazwisko: {{ player.name }} {{ player.surname }}</p>
+        <p>Bramki: {{ player.get_goals.count }}</p>
+        <p>Hat-tricki: {{ player.get_hat_tricks }}</p>
+        <p>Pozycja: {{ player.position }}</p>
+        <p>Nr koszulki: {{ player.shirt_number }}</p>
+        <p>Asysty: {{ player.get_assists.count }}</p>
+        <p>Drużyna: {{ player.team }}</p>
+    </div>
+{% endblock %}

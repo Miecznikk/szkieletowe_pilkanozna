@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h3>{{ team.name|title }}</h3>
+    <img src="{{ team.image.url }}">
+
+    <div class="container">
+  <div class="row">
+    <div class="col-12">
+		<table class="table table-image">
+		  <thead>
+		    <tr>
+		      <th scope="col">Lp</th>
+		      <th scope="col">Zdjęcie</th>
+		      <th scope="col">Imie i nazwisko</th>
+		      <th scope="col">Bramki strzelone</th>
+		      <th scope="col">Pozycja</th>
+		      <th scope="col">Nr koszulki</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+          {% for player in players %}
+		    <tr>
+		      <th scope="row">{{ forloop.counter }}</th>
+		      <td class="w-25">
+			      <img src="{{ player.image.url }}" class="img-fluid img-thumbnail" width="100px" height="100px" alt="Sheep">
+		      </td>
+		      <td><a class="text-decoration-none text-dark" href ={{ player.get_absolute_url }}>{{ player.name }} {{ player.surname }}</a></td>
+		      <td>{{ player.get_goals.count }}</td>
+		      <td>{{ player.position }}</td>
+		      <td>{{ player.shirt_number }}</td>
+		    </tr>
+          {% endfor %}
+		  </tbody>
+		</table>
+    </div>
+  </div>
+</div>
+
+    <form method = "POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="SUBMIT">
+    </form>
+
+{% endblock %}
