@@ -12,7 +12,7 @@
     <header>
         <nav class="navbar navbar-expand-md navbar-light bg-white border-bottom">
             <div class="container-fluid">
-                <a class="navbar-brand" href="#">Football app</a>
+                <a class="navbar-brand" href="{% url 'football:home' %}">Football app</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                     aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -40,6 +40,9 @@
                             </ul>
                         </li>
                     </ul>
+                    <button class="btn btn-outline-success">
+                        <a href = "{% url "football:register_team" %} ">Zarejestruj drużynę</a>
+                    </button>
                     <form class="d-flex">
                         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
                         <button class="btn btn-outline-success" type="submit">Search</button>
@@ -48,6 +51,6 @@
             </div>
         </nav>
     </header>
-    <div id="content">{% block content %} {% endblock %}</div>
+    <div id="content" class="container">{% block content %} {% endblock %}</div>
 </body>
 </html>

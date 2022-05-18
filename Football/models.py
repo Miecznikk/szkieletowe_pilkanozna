@@ -1,7 +1,9 @@
 from django.db import models
 from django.db.models import Count
 from django.urls import reverse
-from django import forms
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class Position(models.Model):
     title = models.CharField(max_length=30)
@@ -43,12 +45,13 @@ class Team(models.Model):
         return len(self.get_goals_scored()) - len(self.get_goals_lost())
 
 class Player(models.Model):
+    user = models.OneToOneField(User,on_delete=models.CASCADE,null=True)
     name = models.CharField(max_length=30)
     surname = models.CharField(max_length=30)
-    position = models.ForeignKey(Position,on_delete=models.CASCADE)
-    shirt_number = models.IntegerField()
+    position = models.ForeignKey(Position,on_delete=models.CASCADE,null=True)
+    shirt_number = models.IntegerField(null=True)
     team = models.ForeignKey(Team,null=True,on_delete=models.SET_NULL)
-    image = models.ImageField(upload_to='images/players/')
+    image = models.ImageField(upload_to='images/players/',null=False,default='images/default_profile_picture.jpg')
 
 
     def get_goals(self):
@@ -73,6 +76,12 @@ class Player(models.Model):
 
     def __str__(self):
         return f'{self.name} {self.surname}'
+
+@receiver(post_save,sender=User)
+def update_user_profile(sender,instance,created,**kwargs):
+    if created:
+        Player.objects.create(user=instance)
+    instance.player.save()
 
 class Stadium(models.Model):
     name = models.CharField(max_length=30)
