@@ -2,8 +2,7 @@ from django.db import models
 from django.db.models import Count
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+from django.core.validators import MaxValueValidator,MinValueValidator
 
 class Position(models.Model):
     title = models.CharField(max_length=30)
@@ -49,10 +48,11 @@ class Player(models.Model):
     name = models.CharField(max_length=30)
     surname = models.CharField(max_length=30)
     position = models.ForeignKey(Position,on_delete=models.CASCADE,null=True)
-    shirt_number = models.IntegerField(null=True)
+    shirt_number = models.IntegerField(null=True, validators=[MinValueValidator(1),MaxValueValidator(99)])
     team = models.ForeignKey(Team,null=True,on_delete=models.SET_NULL)
     image = models.ImageField(upload_to='images/players/',null=False,default='images/default_profile_picture.jpg')
-
+    captain = models.BooleanField(null=False,default=False)
+    mod = models.BooleanField(null=False,default=False)
 
     def get_goals(self):
         goals = Goal.objects.all().filter(player = self)
@@ -76,12 +76,6 @@ class Player(models.Model):
 
     def __str__(self):
         return f'{self.name} {self.surname}'
-
-@receiver(post_save,sender=User)
-def update_user_profile(sender,instance,created,**kwargs):
-    if created:
-        Player.objects.create(user=instance)
-    instance.player.save()
 
 class Stadium(models.Model):
     name = models.CharField(max_length=30)
@@ -130,33 +124,9 @@ class Asist(models.Model):
     goal = models.OneToOneField(Goal,on_delete=models.CASCADE)
     player = models.ForeignKey(Player,on_delete=models.CASCADE)
 
+class Message(models.Model):
+    receiver = models.ForeignKey(Player,on_delete=models.CASCADE)
+    description = models.TextField(max_length=500)
 
-def top_scorers():
-    def take_second(elem):
-        return elem[1]
-    players = Player.objects.all()
-    players = sorted([[player,len(player.get_goals())] for player in players],key = take_second,reverse=True)
-    return players
-
-def get_table():
-    teams = Team.objects.all()
-    table_dict = {team : 0 for team in teams}
-    matches = Match.objects.all()
-    winners = [[match,match.get_winner()] for match in matches]
-
-    def take_second(elem):
-        return elem[1]
-
-    for winner in winners:
-        if winner[1]!='draw':
-            table_dict[winner[1]] += 3
-        elif winner[1] == 'draw':
-            table_dict[winner[0].team1] +=1
-            table_dict[winner[0].team2] +=1
-    arr=[]
-
-    for key in table_dict:
-        arr.append([key,table_dict[key]])
-    arr = sorted(arr,key=take_second)[::-1]
-    arr = [f'{str(i[0])} - {str(i[1])}' for i in arr]
-    return arr
+class Invite(Message):
+    invited_team = models.ForeignKey(Team,on_delete=models.CASCADE)

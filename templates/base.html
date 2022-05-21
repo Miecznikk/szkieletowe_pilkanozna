@@ -40,17 +40,38 @@
                             </ul>
                         </li>
                     </ul>
-                    <button class="btn btn-outline-success">
-                        <a href = "{% url "football:register_team" %} ">Zarejestruj drużynę</a>
-                    </button>
-                    <form class="d-flex">
-                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                        <button class="btn btn-outline-success" type="submit">Search</button>
-                    </form>
                 </div>
+                    {% if user.is_authenticated %}
+                        <span class="me-2">Witaj {{ user.username }}!</span><button class = "btn btn-outline-danger me-2"><a class="text-decoration-none text-dark" href = {% url "logout" %}>Wyloguj</a></button>
+                        {% if user.player %}
+                        <div class="dropdown">
+                            <a class="dropdown-toggle btn me-2 btn-outline-secondary text-dark dropdown-toggle" href="#" id="id3" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Mój profil
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="id3">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'football:profile' %} ">Profil</a>
+                                    <a class="dropdown-item" href="{{ user.player.get_absolute_url }}">Moje statystyki</a>
+                                    {% if user.player.team != None %}
+                                        <a class="dropdown-item" href="{{ user.player.team.get_absolute_url }}">Moja drużyna</a>
+                                    {% endif %}
+                                    <a class="dropdown-item" href ="{% url 'football:messages' %} ">Wiadomości</a>
+                                </li>
+
+                            </ul>
+                        </div>
+                        {% endif %}
+                        <button class="btn btn-outline-success me-2">
+                            <a class="text-decoration-none text-dark" href = "{% url "football:register_team" %} ">Zgłoś drużynę</a>
+                        </button>
+
+                    {% else %}
+                        <button class="btn btn-outline-success me-2"><a href = "{% url "login" %}" class="text-decoration-none text-dark">Zaloguj się</a></button>
+                    {% endif %}
             </div>
         </nav>
     </header>
-    <div id="content" class="container">{% block content %} {% endblock %}</div>
+    <div id="content" class="container">{% block content %} {% endblock %}
 </body>
 </html>

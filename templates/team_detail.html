@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 {% block content %}
     <h3>{{ team.name|title }}</h3>
     <img src="{{ team.image.url }}">
@@ -23,15 +24,32 @@
 		      <th scope="row">{{ forloop.counter }}</th>
 		      <td class="w-25">
 			      <img src="{{ player.image.url }}" class="img-fluid img-thumbnail" width="100px" height="100px" alt="Sheep">
+                  {% if player.captain == True %}
+                      <img src="../media/images/captain.png" height="35px" width="35px">
+                  {% endif %}
 		      </td>
-		      <td><a class="text-decoration-none text-dark" href ={{ player.get_absolute_url }}>{{ player.name }} {{ player.surname }}</a></td>
+		      <td><a class="text-dark text-decoration-none" href ={{ player.get_absolute_url }}><p class="fw-bold">{{ player.name }} {{ player.surname }}</p></a></td>
 		      <td>{{ player.get_goals.count }}</td>
 		      <td>{{ player.position }}</td>
-		      <td>{{ player.shirt_number }}</td>
+		      <td>
+                  {% if player.shirt_number != None %}
+                  {{ player.shirt_number }}
+                  {% else %}
+                  Nieokreślony
+                  {% endif %}
+              </td>
 		    </tr>
           {% endfor %}
 		  </tbody>
 		</table>
+        {% if form != None %}
+            <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-outline-success">Zaproś</button>
+            </form>
+
+        {% endif %}
     </div>
   </div>
 </div>

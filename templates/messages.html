@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% for i in invites %}
+    <div class="card mt-2">
+        <div class="card-header">
+            Zaproszenie
+        </div>
+        <div class="card-body">
+            <p class="card-text">{{ i.description }}</p>
+            <div class="d-flex flex-row">
+                <form method = "POST">
+                    {% csrf_token %}
+                    <button type="submit" name = "accept" value="{{ i.id }}" class="btn btn-primary">Przyjmij</button>
+                </form>
+                <form method = "POST">
+                    {% csrf_token %}
+                    <button type="submit" name="decline" value="{{ i.id }}" class="btn btn-danger ms-2">Usuń</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+{% endfor %}
+{% for m in messages %}
+    <div class="card mt-2">
+        <div class="card-header">
+            Wiadomość
+        </div>
+        <div class="card-body">
+            <p class="card-text">{{ m.description }}</p>
+            <div class="d-flex flex-row">
+                <a href="#" class="btn btn-danger ms-2">Usuń</a>
+            </div>
+
+        </div>
+    </div>
+{% endfor %}
+{% endblock %}
