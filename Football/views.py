@@ -2,28 +2,10 @@ from django.shortcuts import render,get_object_or_404,redirect
 from .models import Team,Player,Position,Message,Invite
 from .ext_methods import get_table,send_invite_to_team
 from django.template.defaultfilters import slugify
-from .forms import RegisterTeamForm,RegisterForm,UpdateProfileForm,InvitePlayer
+from .forms import RegisterTeamForm,UpdateProfileForm,InvitePlayer,SendMessage
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login,logout,authenticate
 
-
-
-def sign_up(request):
-    if request.method == "POST":
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            user.refresh_from_db()
-            user.player.name=form.cleaned_data.get('name')
-            user.player.surname=form.cleaned_data.get('surname')
-            position = Position.objects.filter(id=form.cleaned_data.get('position'))[0]
-            user.player.position = position
-            login(request,user)
-            return redirect('/home')
-    else:
-        form = RegisterForm()
-
-    return render(request,'registration/sign_up.html',{'form':form})
 
 def home_view(request):
     return render(request,'home.html',{})
@@ -157,5 +139,17 @@ def messages_view(request):
                 err_msg = 'Jesteś już w drużynie, opuść ją aby dołączyć do innej'
                 return render(request,'error.html',{'err':err_msg})
             return redirect('football:team_detail',slug=team.slug)
-    return render(request,'messages.html',{'messages':messages,'invites':invites})
+    return render(request, 'messages/messages.html', {'messages':messages, 'invites':invites})
+
+@login_required(login_url='/login')
+def send_message_view(request,receiver = None):
+    if request.method == "POST":
+        form = SendMessage(request.POST,user=request.user.player)
+        if form.is_valid():
+            form.instance.sender = request.user.player
+            form.save()
+            return redirect('football:messages')
+    else:
+        form = SendMessage(user=request.user.player,initial={'receiver':receiver})
+    return render(request,'messages/send_message.html',{'form':form})
 # Create your views here.

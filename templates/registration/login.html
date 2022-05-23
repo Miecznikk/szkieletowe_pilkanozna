@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{% block title %} Logowanie {% endblock title %}
 {% block content %}
 {% load crispy_forms_tags %}
     <form method = "POST">
         {% csrf_token %}
         {{ form|crispy }}
         <button class= "btn btn-outline-success" type="submit">Login</button>
-        <p>Nie masz konta? Zarejestruj się <a href="{% url "football:register" %}" class="text-decoration-none text-red">tutaj</a></p>
+        <p>Nie masz konta? Zarejestruj się <a href="{% url "users:register" %}" class="text-decoration-none text-red">tutaj</a></p>
     </form>
 
 {% endblock %}

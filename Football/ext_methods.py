@@ -1,6 +1,5 @@
 from .models import Player,Team,Match,Invite
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+
 from django.contrib.auth.models import User
 
 def top_scorers():
@@ -33,11 +32,6 @@ def get_table():
     arr = [f'{str(i[0])} - {str(i[1])}' for i in arr]
     return arr
 
-@receiver(post_save,sender=User)
-def update_user_profile(sender,instance,created,**kwargs):
-    if created:
-        Player.objects.create(user=instance)
-    instance.player.save()
 
 def get_teams(request):
     return {'teams' : Team.objects.all()}

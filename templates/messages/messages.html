@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% block title %} Wiadomości {% endblock title %}
 {% block content %}
 {% if invites %}
 <h1>Zaproszenia</h1>
@@ -38,6 +38,7 @@
             <div class="d-flex flex-row">
                 <form method="post">
                     {% csrf_token %}
+                    <a class="btn btn-primary" href="{% url 'football:send_message' m.sender.id %}">Odpowiedz</a>
                     <button type="submit" name="decline" value="{{ m.id }}" class="btn btn-danger">Usuń</button>
                 </form>
             </div>
@@ -45,4 +46,5 @@
         </div>
     </div>
 {% endfor %}
+    <a href="{% url 'football:send_message' %}" class="btn btn-primary mt-2">Wyślij wiadomość</a>
 {% endblock %}
