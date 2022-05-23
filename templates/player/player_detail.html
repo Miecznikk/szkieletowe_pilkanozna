@@ -10,4 +10,10 @@
         <p>Asysty: {{ player.get_assists.count }}</p>
         <p>Drużyna: {{ player.team }}</p>
     </div>
+    {% if user.player.captain and player.team == None %}
+    <form method="post">
+    {% csrf_token %}
+        <button class="btn btn-outline-primary" type="submit">Zaproś do drużyny</button>
+    </form>
+    {% endif %}
 {% endblock %}

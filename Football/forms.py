@@ -18,7 +18,7 @@ class RegisterForm(UserCreationForm):
         fields = ["username","name","surname","password1","password2","position"]
 
 class InvitePlayer(forms.Form):
-    invite = forms.ModelChoiceField(label = 'Zaproś zawodnika do drużyny',
+    invite = forms.ModelChoiceField(label = 'Zaproś zawodnika do drużyny', required=False,
                                     queryset=Player.objects.filter(team=None,mod=False))
 
 class UserLoginForm(AuthenticationForm):

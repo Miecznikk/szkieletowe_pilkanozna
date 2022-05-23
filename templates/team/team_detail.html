@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <h3>{{ team.name|title }}</h3>
+    <img src="{{ team.image.url }}">
+
+    <div class="container">
+  <div class="row">
+    <div class="col-12">
+		<table class="table table-image">
+		  <thead>
+		    <tr>
+                <th scope="col">Lp</th>
+                <th scope="col">Zdjęcie</th>
+                <th scope="col">Imie i nazwisko</th>
+                <th scope="col">Bramki strzelone</th>
+                <th scope="col">Pozycja</th>
+                <th scope="col">Nr koszulki</th>
+                {% if user.player.captain and user.player.team == team %}
+                <th scope="col">Opcje</th>
+                {% endif %}
+		    </tr>
+		  </thead>
+		  <tbody>
+          {% for player in players %}
+		    <tr>
+		      <th scope="row">{{ forloop.counter }}</th>
+		      <td class="w-25">
+			      <img src="{{ player.image.url }}" class="img-fluid img-thumbnail" width="100px" height="100px" alt="Sheep">
+                  {% if player.captain == True %}
+                      <img src="../../media/images/captain.png" alt="captain" height="35px" width="35px">
+                  {% endif %}
+		      </td>
+		      <td><a class="text-dark text-decoration-none" href ={{ player.get_absolute_url }}><p class="fw-bold">{{ player.name }} {{ player.surname }}</p></a></td>
+		      <td>{{ player.get_goals.count }}</td>
+		      <td>{{ player.position }}</td>
+		      <td>
+                  {% if player.shirt_number != None %}
+                  {{ player.shirt_number }}
+                  {% else %}
+                  Nieokreślony
+                  {% endif %}
+              </td>
+                {% if user.player.captain and user.player.team == team and player != user.player %}
+                    <td>
+                        <div class="d-flex flex-column">
+                            <form method="post" id="promote_form" onsubmit="return confirm('na pewno?')">
+                                {% csrf_token %}
+                                <button id="promote_submit" type="submit" name="promote" value="{{ player.id }}" class="btn btn-primary">Awansuj</button>
+                            </form>
+                            <form method="post" id="delete_form" onsubmit="return confirm('na pewno?')">
+                                {% csrf_token %}
+                                <button id="delete_submit" type="submit" name="delete_from_team" value="{{ player.id }}" class="btn btn-danger mt-1">Usuń</button>
+                            </form>
+                        </div>
+                    </td>
+                {% endif %}
+		    </tr>
+
+          {% endfor %}
+		  </tbody>
+		</table>
+        {% if user.player.captain == False and user.player.team == team %}
+        <form method="post" onsubmit="return confirm('Czy na pewno chcesz opuścić drużynę?')">
+            {% csrf_token %}
+            <button class="btn btn-danger" type="submit" name="leave_team" value="{{ user.id }}">Opuść drużynę</button>
+        </form>
+        {% endif %}
+        {% if form != None %}
+            <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <button type="submit" class="btn btn-outline-success">Zaproś</button>
+            </form>
+
+        {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

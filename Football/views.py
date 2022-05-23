@@ -32,7 +32,23 @@ def all_teams(request):
     context = {
         'teams' : Team.objects.all()
     }
-    return render(request,'all_teams.html',context)
+    return render(request, 'team/all_teams.html', context)
+
+def all_players(request):
+    context = {
+        'players' : Player.objects.filter(mod=False)
+    }
+    if request.method=="POST":
+        name,surname = request.POST.get('zawodnik').split()
+        player = Player.objects.filter(name=name,surname=surname)
+        if player:
+            if len(player)>1:
+                context = {
+                    'players':player
+                }
+            elif len(player)==1:
+                return redirect('football:player_detail',id=player[0].id)
+    return render(request, 'player/all_players.html', context)
 
 def table_view(request):
     context = {
@@ -43,19 +59,43 @@ def table_view(request):
 def team_detail(request,slug):
     team = get_object_or_404(Team, slug=slug)
     players = Player.objects.filter(team_id=team.id)
+    if request.user.player.team == team and not request.user.player.captain:
+        if request.method == "POST":
+            leave_team = request.POST.get('leave_team')
+            if leave_team is not None:
+                request.user.player.team = None
+                request.user.player.save()
+                return redirect('football:home')
     if request.user.player.captain and request.user.player.team == team:
         if request.method == "POST":
-            form = InvitePlayer(request.POST)
-            if form.is_valid():
-                invited_player = form.cleaned_data.get('invite')
-                send_invite_to_team(f'Zostałeś zaproszony przez {request.user.player.__str__()} do drużyny '
-                                    f'{team.__str__()}',invited_player,team)
-                return redirect('football:home')
+            delete_player = request.POST.get('delete_from_team')
+            promote_player = request.POST.get('promote')
+            if delete_player is not None:
+                form = None
+                deleted_player = get_object_or_404(Player,id=delete_player)
+                deleted_player.team = None
+                deleted_player.save()
+                return redirect('football:team_detail',slug=team.slug)
+            if promote_player is not None:
+                form = None
+                promoting_player = get_object_or_404(Player, id=promote_player)
+                promoting_player.captain=True
+                request.user.player.captain=False
+                promoting_player.save()
+                request.user.player.save()
+                return redirect('football:team_detail',slug=team.slug)
+            else:
+                form = InvitePlayer(request.POST)
+                if form.is_valid():
+                    invited_player = form.cleaned_data.get('invite')
+                    send_invite_to_team(f'Zostałeś zaproszony przez {request.user.player.__str__()} do drużyny '
+                                        f'{team.__str__()}',request.user.player,invited_player,team)
+                    return redirect('football:team_detail',slug=team.slug)
         else:
             form = InvitePlayer()
     else:
         form = None
-    return render(request,'team_detail.html',{'team':team,'players':players,'form':form})
+    return render(request, 'team/team_detail.html', {'team':team, 'players':players, 'form':form})
 
 @login_required(login_url='/login')
 def register_team(request):
@@ -75,7 +115,7 @@ def register_team(request):
             err_msg = "Jesteś już w drużynie, opuść ją aby założyć własną"
             return render(request,'error.html',{'err':err_msg})
         form = RegisterTeamForm()
-    return render(request,'register_team.html',{'form':form})
+    return render(request, 'team/register_team.html', {'form':form})
 
 @login_required(login_url='/login')
 def profile(request):
@@ -86,16 +126,20 @@ def profile(request):
             return redirect('football:home')
     else:
         form = UpdateProfileForm(instance = request.user.player)
-    return render(request,'profile.html',{'form':form})
+    return render(request, 'player/profile.html', {'form':form})
 
 def player_detail(request,id):
     player = get_object_or_404(Player,id=id)
-    return render(request,'player_detail.html',{'player':player})
+    if request.method=="POST":
+        send_invite_to_team(f'Zostałeś zaproszony przez {request.user.player.__str__()} do drużyny'
+                            f'{request.user.player.team.__str__()}',request.user.player,player,request.user.player.team)
+        return redirect('football:all_players')
+    return render(request, 'player/player_detail.html', {'player':player})
 
 @login_required(login_url='/login')
 def messages_view(request):
     messages = Message.objects.filter(receiver=request.user.player,invite__isnull = True)
-    invites = Message.objects.filter(receiver=request.user.player)
+    invites = Invite.objects.filter(receiver=request.user.player)
     if request.method == "POST":
         message_accept = request.POST.get("accept")
         message_decline = request.POST.get("decline")
@@ -105,9 +149,13 @@ def messages_view(request):
         elif message_accept is not None:
             inv = get_object_or_404(Invite,id = message_accept)
             team = inv.invited_team
-            request.user.player.team = team
-            request.user.player.save()
-            inv.delete()
+            if request.user.player.team is None:
+                request.user.player.team = team
+                request.user.player.save()
+                inv.delete()
+            else:
+                err_msg = 'Jesteś już w drużynie, opuść ją aby dołączyć do innej'
+                return render(request,'error.html',{'err':err_msg})
             return redirect('football:team_detail',slug=team.slug)
     return render(request,'messages.html',{'messages':messages,'invites':invites})
 # Create your views here.

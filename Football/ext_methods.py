@@ -42,5 +42,5 @@ def update_user_profile(sender,instance,created,**kwargs):
 def get_teams(request):
     return {'teams' : Team.objects.all()}
 
-def send_invite_to_team(description,send_to,invited_team):
-    invite = Invite.objects.create(description=description,receiver=send_to,invited_team=invited_team)
+def send_invite_to_team(description,send_from,send_to,invited_team):
+    invite = Invite.objects.create(description=description,sender =send_from,receiver=send_to,invited_team=invited_team)

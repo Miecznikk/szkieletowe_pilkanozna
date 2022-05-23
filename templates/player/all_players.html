@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+    <form method="POST" autocomplete="off">
+        {% csrf_token %}
+        <label class="mt-3">Szukaj zawodnika</label>
+        <input name="zawodnik" class="form-control mt-1" list="zawodnicy">
+        <datalist id="zawodnicy">
+            {% for player in players %}
+            <option value="{{ player }}">
+            </option>
+            {% endfor %}
+        </datalist>
+    </form>
+
+    <div class = "album mt-2">
+        <div class="row">
+            {% for player in players %}
+            <div class="col">
+              <div class="card ms-3 mt-3 box-shadow" style="width:18rem">
+                <img class="card-img-top" src="{{ player.image.url }}" alt="{{ player.name }}" width="150px" height = "250px" >
+                <div class="card-body">
+                  <h4 class="card-text">{{ player }}</h4>
+                    <p class = "card-text">Drużyna: {{ player.team }}</p>
+                    <p class="card-text">Zdobyte bramki: {{ player.get_goals.count }}</p>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-outline-secondary">
+                          <a class="text-decoration-none text-dark" href="{{ player.get_absolute_url }}">Profil</a>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+
+{% endblock %}

@@ -125,7 +125,8 @@ class Asist(models.Model):
     player = models.ForeignKey(Player,on_delete=models.CASCADE)
 
 class Message(models.Model):
-    receiver = models.ForeignKey(Player,on_delete=models.CASCADE)
+    sender = models.ForeignKey(Player,on_delete=models.CASCADE,related_name='sender')
+    receiver = models.ForeignKey(Player,on_delete=models.CASCADE,related_name='receiver')
     description = models.TextField(max_length=500)
 
 class Invite(Message):
