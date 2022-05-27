@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %} Wprowadz wynik {% endblock %}
+{% block content %}
+    {{ match.team1 }} VS {{ match.team2 }}
+    <form method="post" onsubmit="return confirm('Czy na pewno?')">
+        {% csrf_token %}
+        <h1>{{ match.team1 }}</h1>
+        {% for player in players1 %}
+            <label>{{ player }}</label>
+            <input type="number" name="{{ player.id }}" value="0" min="0" max="100">
+            <br/>
+        {% endfor %}
+        <h1>{{ match.team2 }}</h1>
+        {% for player in players2 %}
+            <label>{{ player }}</label>
+            <input type="number" name="{{ player.id }}" value="0" min="0" max="100">
+            <br/>
+        {% endfor %}
+    <button type="submit" class="btn btn-primary" >Wprowadz</button>
+    </form>
+
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Position,Player,Team,Stadium,Match,Goal,Asist,Message,Invite
+from .models import Position,Player,Team,Stadium,Match,Goal,Message,Invite,Challenge
 
 @admin.register(Position)
 class PositionAdmin(admin.ModelAdmin):
@@ -23,13 +23,9 @@ class StadiumAdmin(admin.ModelAdmin):
 class GoalAdmin(admin.ModelAdmin):
     list_display = ['player','match']
 
-@admin.register(Asist)
-class AsistAdmin(admin.ModelAdmin):
-    list_display = ['player']
-
 @admin.register(Match)
 class MatchAdmin(admin.ModelAdmin):
-    list_display = ['team1','team2','date']
+    list_display = ['team1','team2','date','status']
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
@@ -38,4 +34,8 @@ class MessageAdmin(admin.ModelAdmin):
 @admin.register(Invite)
 class InviteAdmin(admin.ModelAdmin):
     list_display = ['invited_team']
+
+@admin.register(Challenge)
+class ChallengeAdmin(admin.ModelAdmin):
+    list_display = ['challenging_team','challenged_team']
 # Register your models here.

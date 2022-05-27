@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'Users',
     'crispy_forms',
     'crispy_bootstrap5',
+    'django.db.backends.sqlite3',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap5'

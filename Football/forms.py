@@ -1,15 +1,19 @@
 from django import forms
-from .models import Player,Team,Message
+import datetime
+from django.utils import timezone
+from .models import Player,Team,Message,Challenge
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 class SendMessage(forms.ModelForm):
     receiver = forms.ModelChoiceField(required=True,label='Odbiorca',
                                       queryset=Player.objects.filter(mod=False))
 
     def __init__(self,*args,**kwargs):
-        self.user=kwargs.pop('user')
+        self.user = kwargs.pop('user')
         super(SendMessage,self).__init__(*args,**kwargs)
+        self.fields['receiver'].queryset = Player.objects.filter(mod=False).exclude(id=self.user.id)
 
     class Meta:
         model = Message
@@ -20,8 +24,30 @@ class SendMessage(forms.ModelForm):
 
     def clean(self):
         cd = self.cleaned_data
-        if self.user == cd.get('receiver'):
-            raise forms.ValidationError('Nie możesz wysłać wiadomości do samego siebie!')
+        if cd.get('receiver') == self.user:
+            raise forms.ValidationError('Nie możesz wysłać wiadomości do siebie')
+        return cd
+
+class DateInput(forms.DateInput):
+    input_type = 'date'
+
+class ChallengeForm(forms.ModelForm):
+    class Meta:
+        model = Challenge
+        fields=['stadium','date','challenged_team']
+        labels ={
+            'stadium': 'Biosko',
+            'date': 'Data',
+            'challenged_team': 'Drużyna'
+        }
+        widgets = {
+            'date':DateInput(),
+            }
+
+    def clean(self):
+        cd=self.cleaned_data
+        if cd.get('date') <= datetime.date.today():
+            raise forms.ValidationError('Pomiędzy dniem dzisiejszym a meczowym musi być co najmniej jeden dzień różnicy')
         return cd
 
 class InvitePlayer(forms.Form):

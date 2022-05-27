@@ -1,8 +1,8 @@
 from django.shortcuts import render,get_object_or_404,redirect
-from .models import Team,Player,Position,Message,Invite
+from .models import Team,Player,Position,Message,Invite,Challenge,Match
 from .ext_methods import get_table,send_invite_to_team
 from django.template.defaultfilters import slugify
-from .forms import RegisterTeamForm,UpdateProfileForm,InvitePlayer,SendMessage
+from .forms import RegisterTeamForm,UpdateProfileForm,InvitePlayer,SendMessage,ChallengeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login,logout,authenticate
 
@@ -120,11 +120,13 @@ def player_detail(request,id):
 
 @login_required(login_url='/login')
 def messages_view(request):
-    messages = Message.objects.filter(receiver=request.user.player,invite__isnull = True)
+    messages = Message.objects.filter(receiver=request.user.player,invite__isnull = True,challenge__isnull=True)
+    challenges = Challenge.objects.filter(receiver=request.user.player)
     invites = Invite.objects.filter(receiver=request.user.player)
     if request.method == "POST":
         message_accept = request.POST.get("accept")
         message_decline = request.POST.get("decline")
+        challenge_accept = request.POST.get("challenge")
         if message_decline is not None:
             message = get_object_or_404(Message,id = message_decline)
             message.delete()
@@ -139,7 +141,12 @@ def messages_view(request):
                 err_msg = 'Jesteś już w drużynie, opuść ją aby dołączyć do innej'
                 return render(request,'error.html',{'err':err_msg})
             return redirect('football:team_detail',slug=team.slug)
-    return render(request, 'messages/messages.html', {'messages':messages, 'invites':invites})
+        elif challenge_accept is not None:
+            challenge = Challenge.objects.filter(id=challenge_accept).first()
+            challenge.accept()
+            challenge.delete()
+            return redirect('football:messages')
+    return render(request, 'messages/messages.html', {'messages':messages, 'invites':invites,'challenges':challenges})
 
 @login_required(login_url='/login')
 def send_message_view(request,receiver = None):
@@ -150,6 +157,62 @@ def send_message_view(request,receiver = None):
             form.save()
             return redirect('football:messages')
     else:
-        form = SendMessage(user=request.user.player,initial={'receiver':receiver})
+        form = SendMessage(user=request.user.player,initial={'receiver':receiver,'sender':request.user.player})
     return render(request,'messages/send_message.html',{'form':form})
-# Create your views here.
+
+@login_required(login_url='/login')
+def challenge_team(request,challenged_team):
+    if request.method=="POST":
+        form = ChallengeForm(request.POST)
+        if form.is_valid():
+            form.instance.sender = request.user.player
+            form.instance.challenging_team = request.user.player.team
+
+            cd = form.cleaned_data
+            team = cd.get('challenged_team')
+            form.instance.receiver = team.get_captain()
+            form.instance.description = f'Rzucono ci wyzwanie od drużyny {request.user.player.team} w dniu' \
+                                        f' {cd.get("date")} na boisku {cd.get("stadium")}'
+            form.save()
+            return redirect('football:team_detail',slug=request.user.player.team.slug)
+    else:
+        form = ChallengeForm(initial={'challenged_team':challenged_team})
+    return render(request,'match/challenge.html',{'form':form})
+
+@login_required(login_url='/login')
+def post_score_view(request,id):
+    match = Match.objects.filter(id=id).first()
+    players1 = Player.objects.filter(team= match.team1)
+    players2 = Player.objects.filter(team = match.team2)
+
+    if request.method=="POST" and not match.status:
+        for player in players1 | players2:
+            n_of_goals=int(request.POST.get(str(player.id)))
+            if n_of_goals>0:
+                player.score(match,n_of_goals)
+        match.status = True
+        match.save()
+        sender = request.user.player
+        receiver=None
+        if sender.team == match.team1:
+            receiver = match.team2.get_captain()
+        elif sender.team == match.team2:
+            receiver = match.team1.get_captain()
+        Message.objects.create(sender=sender,receiver=receiver,
+                               description=f'Kapitan drużyny przeciwnej wprowadził wynik meczu {match}'
+                                           f', jeśli nie zgadzasz się z wprowadzonym wynikiem skontaktuj się '
+                                           f'z administratorem Diabelskich rozgrywek')
+        return redirect('football:team_matches')
+
+    context = {
+        'match':match,
+        'players1':players1,
+        'players2':players2,
+    }
+    return render(request,'match/post_score.html',context)
+
+@login_required(login_url='/login')
+def team_matches(request):
+    my_matches = Match.objects.filter(team1 = request.user.player.team) \
+                 | Match.objects.filter(team2 = request.user.player.team)
+    return render(request,'match/team_matches.html',{'matches':my_matches})

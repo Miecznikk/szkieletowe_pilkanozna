@@ -23,16 +23,10 @@ class Team(models.Model):
         return goals
 
     def get_goals_lost(self):
-        matches = Match.objects.all().filter(team1=self)
-        matches_ids = [match.id for match in matches]
-        matches2 = Match.objects.all().filter(team2=self)
-        matches2_ids = [match.id for match in matches2]
-        goals = Goal.objects.all()
-        goals_lost = [goal for goal in goals if goal.match_id in matches_ids]
-        goals_lost2 = [goal for goal in goals if goal.match_id in matches2_ids]
-        goals = goals_lost + goals_lost2
-        goals = [goal for goal in goals if goal.player.team_id != self.id]
-        return goals
+        matches = Match.objects.filter(team1 = self) | Match.objects.filter(team2 = self)
+        goals = [goal for goal in Goal.objects.all() if goal.match in matches]
+        goals_lost = [goal for goal in goals if goal.team != self]
+        return len(goals_lost)
 
     def get_absolute_url(self):
         return reverse('football:team_detail',args=[self.slug])
@@ -41,7 +35,12 @@ class Team(models.Model):
         return len(Player.objects.filter(team_id=self.id))
 
     def get_balance(self)->int:
-        return len(self.get_goals_scored()) - len(self.get_goals_lost())
+        pass
+
+    def get_captain(self):
+        player = Player.objects.filter(team=self,captain=True).first()
+        return player
+
 
 class Player(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE,null=True)
@@ -58,10 +57,6 @@ class Player(models.Model):
         goals = Goal.objects.all().filter(player = self)
         return goals
 
-    def get_assists(self):
-        assists = Asist.objects.all().filter(player = self)
-        return assists
-
     def get_hat_tricks(self):
         goals = Goal.objects.all().filter(player = self)
         goals = goals.values('match').annotate(total = Count('player'))
@@ -70,6 +65,10 @@ class Player(models.Model):
             if i['total'] >= 3:
                 count+=1
         return count
+
+    def score(self,match,n_of_goals):
+        for i in range(n_of_goals):
+            Goal.objects.create(match=match,player=self,team=self.team)
 
     def get_absolute_url(self):
         return reverse('football:player_detail',args=[self.id])
@@ -88,41 +87,37 @@ class Match(models.Model):
     team1 = models.ForeignKey(Team,related_name='teamone',on_delete=models.CASCADE)
     team2 = models.ForeignKey(Team,related_name='teamtwo',on_delete=models.CASCADE)
     stadium = models.ForeignKey(Stadium,null=True,on_delete=models.SET_NULL)
-    date = models.DateTimeField()
+    date = models.DateField(null=False)
+    status = models.BooleanField(default=False, null=False)
 
     class Meta:
         verbose_name_plural = 'Matches'
 
+    def __str__(self):
+        return f'{self.team1.__str__()} - {self.team2.__str__()} {self.get_score()}'
+
     def get_score(self):
-        all_goals = Goal.objects.all().filter(match=self.id)
-        one_goals = all_goals.filter(player__team_id=self.team1)
-        two_goals = all_goals.filter(player__team_id=self.team2)
-        return f'{len(one_goals)} : {len(two_goals)}'
+        goals1 = Goal.objects.filter(match=self,team=self.team1)
+        goals2 = Goal.objects.filter(match=self,team=self.team2)
+        return f'{len(goals1)} : {len(goals2)}'
 
     def get_winner(self):
-        all_goals = Goal.objects.filter(match = self.id)
-        one_goals = len(all_goals.filter(player__team_id = self.team1))
-        two_goals = len(all_goals.filter(player__team_id = self.team2))
-        if one_goals>two_goals:
+        score = self.get_score().split(':')
+        if score[0] > score[1]:
             return self.team1
-        elif one_goals<two_goals:
+        elif score[0] < score[1]:
             return self.team2
         else:
             return 'draw'
 
-    def __str__(self):
-        return f'{self.team1.__str__()} - {self.team2.__str__()} : {self.get_score()}'
-
 class Goal(models.Model):
     match = models.ForeignKey(Match,on_delete=models.CASCADE)
-    player = models.ForeignKey(Player,on_delete=models.CASCADE)
+    player = models.CharField(max_length=100)
+    team = models.ForeignKey(Team,on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{str(self.player)} - {self.match}'
 
-class Asist(models.Model):
-    goal = models.OneToOneField(Goal,on_delete=models.CASCADE)
-    player = models.ForeignKey(Player,on_delete=models.CASCADE)
 
 class Message(models.Model):
     sender = models.ForeignKey(Player,on_delete=models.CASCADE,related_name='sender')
@@ -131,3 +126,17 @@ class Message(models.Model):
 
 class Invite(Message):
     invited_team = models.ForeignKey(Team,on_delete=models.CASCADE)
+
+class Challenge(Message):
+    stadium = models.ForeignKey(Stadium,on_delete=models.CASCADE)
+    date = models.DateField()
+    challenged_team = models.ForeignKey(Team,on_delete=models.CASCADE,related_name='challenged_team')
+    challenging_team = models.ForeignKey(Team,on_delete=models.CASCADE,related_name='challenging_team')
+
+    def accept(self):
+        Match.objects.create(stadium=self.stadium,date=self.date,team1=self.challenging_team,
+                             team2 = self.challenged_team)
+
+
+class MatchReport(Message):
+    match = models.ForeignKey(Match,on_delete=models.CASCADE)

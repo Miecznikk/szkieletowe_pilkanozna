@@ -46,6 +46,7 @@
                                         <a class="dropdown-item" href="{{ user.player.team.get_absolute_url }}">Moja drużyna</a>
                                     {% endif %}
                                     <a class="dropdown-item" href ="{% url 'football:messages' %} ">Wiadomości</a>
+                                    <a class="dropdown-item" href ="{% url 'football:team_matches' %}">Moje mecze</a>
                                 </li>
 
                             </ul>

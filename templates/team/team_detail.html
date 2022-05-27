@@ -42,7 +42,7 @@
                   Nieokreślony
                   {% endif %}
               </td>
-                {% if user.player.captain and user.player.team == team and player != user.player %}
+                {% if user.player == team.get_captain and player != user.player %}
                     <td>
                         <div class="d-flex flex-column">
                             <form method="post" id="promote_form" onsubmit="return confirm('na pewno?')">
@@ -74,6 +74,9 @@
                 <button type="submit" class="btn btn-outline-success">Zaproś</button>
             </form>
 
+        {% endif %}
+        {% if user.player.captain == True and user.player.team != team %}
+            <a href="{% url 'football:challenge' team.id %}" class="btn btn-success">Rzuć wyzwanie</a>
         {% endif %}
     </div>
   </div>

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %} Moje mecze {% endblock %}
+{% block content %}
+{% for match in matches %}
+    {% if match.status %}
+        <h3>{{ match.team1 }} VS {{ match.team2 }} : {{ match.get_score }}</h3>
+    {% else %}
+        <h3>{{ match.team1 }} VS {{ match.team2 }} <a class="btn btn-primary" href="{% url 'football:post_score' match.id %}">Wprowadz wynik</a></h3>
+    {% endif %}
+{% endfor %}
+{% endblock %}
