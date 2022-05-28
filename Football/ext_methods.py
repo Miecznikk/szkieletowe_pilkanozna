@@ -1,36 +1,55 @@
 from .models import Player,Team,Match,Invite
 
-from django.contrib.auth.models import User
-
 def top_scorers():
-    def take_second(elem):
-        return elem[1]
-    players = Player.objects.all()
-    players = sorted([[player,len(player.get_goals())] for player in players],key = take_second,reverse=True)
-    return players
+    class table_row:
+        team=None
+        player=None
+        scored=0
+
+    table=[]
+    players=Player.objects.filter(mod=False)
+    for player in players:
+        tr=table_row()
+        tr.player=player
+        tr.team=player.team
+        tr.scored=player.get_goals()
+        table.append(tr)
+    return sorted(table,reverse=True,key=lambda x:x.scored)[:6]
 
 def get_table():
+
+    class table_row:
+        team = None
+        matches = 0
+        scored = 0
+        lost = 0
+        balance = 0
+        points = 0
+        wins = 0
+        draws = 0
+        loses = 0
+
     teams = Team.objects.all()
-    table_dict = {team : 0 for team in teams}
-    matches = Match.objects.all()
-    winners = [[match,match.get_winner()] for match in matches]
-
-    def take_second(elem):
-        return elem[1]
-
-    for winner in winners:
-        if winner[1]!='draw':
-            table_dict[winner[1]] += 3
-        elif winner[1] == 'draw':
-            table_dict[winner[0].team1] +=1
-            table_dict[winner[0].team2] +=1
-    arr=[]
-
-    for key in table_dict:
-        arr.append([key,table_dict[key]])
-    arr = sorted(arr,key=take_second)[::-1]
-    arr = [f'{str(i[0])} - {str(i[1])}' for i in arr]
-    return arr
+    rows = []
+    for team in teams:
+        tr = table_row()
+        tr.team = team
+        matches = Match.objects.filter(team1=team) | Match.objects.filter(team2=team)
+        tr.matches = len(matches)
+        for match in matches:
+            if match.get_winner() == team:
+                tr.points+=3
+                tr.wins+=1
+            elif match.get_winner() == 'draw':
+                tr.points+=1
+                tr.draws+=1
+            else:
+                tr.loses+=1
+        tr.scored = team.get_goals_scored()
+        tr.lost = team.get_goals_lost()
+        tr.balance = team.get_balance()
+        rows.append(tr)
+    return sorted(rows,key=lambda x:(x.points,x.balance),reverse=True)
 
 
 def get_teams(request):

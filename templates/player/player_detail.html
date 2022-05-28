@@ -4,11 +4,10 @@
     <div>
         <img src="{{ player.image.url }}">
         <p>Imie i nazwisko: {{ player.name }} {{ player.surname }}</p>
-        <p>Bramki: {{ player.get_goals.count }}</p>
+        <p>Bramki: {{ player.get_goals }}</p>
         <p>Hat-tricki: {{ player.get_hat_tricks }}</p>
         <p>Pozycja: {{ player.position }}</p>
         <p>Nr koszulki: {{ player.shirt_number }}</p>
-        <p>Asysty: {{ player.get_assists.count }}</p>
         <p>Drużyna: <a class="fw-bold text-dark text-decoration-none" href="{{ player.team.get_absolute_url }}">{{ player.team }}</a> </p>
     </div>
     {% if user.player.captain and player.team == None %}

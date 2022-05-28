@@ -1,6 +1,6 @@
 from django.shortcuts import render,get_object_or_404,redirect
 from .models import Team,Player,Position,Message,Invite,Challenge,Match
-from .ext_methods import get_table,send_invite_to_team
+from .ext_methods import get_table,send_invite_to_team,top_scorers
 from django.template.defaultfilters import slugify
 from .forms import RegisterTeamForm,UpdateProfileForm,InvitePlayer,SendMessage,ChallengeForm
 from django.contrib.auth.decorators import login_required
@@ -8,7 +8,8 @@ from django.contrib.auth import login,logout,authenticate
 
 
 def home_view(request):
-    return render(request,'home.html',{})
+    table = top_scorers()
+    return render(request,'home.html',{'table':table})
 
 def all_teams(request):
     context = {

@@ -33,7 +33,7 @@
                   {% endif %}
 		      </td>
 		      <td><a class="text-dark text-decoration-none" href ={{ player.get_absolute_url }}><p class="fw-bold">{{ player.name }} {{ player.surname }}</p></a></td>
-		      <td>{{ player.get_goals.count }}</td>
+		      <td>{{ player.get_goals }}</td>
 		      <td>{{ player.position }}</td>
 		      <td>
                   {% if player.shirt_number != None %}

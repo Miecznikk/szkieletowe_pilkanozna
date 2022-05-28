@@ -3,6 +3,7 @@ from django.db.models import Count
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator,MinValueValidator
+from datetime import date
 
 class Position(models.Model):
     title = models.CharField(max_length=30)
@@ -19,8 +20,8 @@ class Team(models.Model):
         return self.name
 
     def get_goals_scored(self):
-        goals = Goal.objects.all().filter(player__team_id = self.id)
-        return goals
+        goals = Goal.objects.all().filter(team=self)
+        return len(goals)
 
     def get_goals_lost(self):
         matches = Match.objects.filter(team1 = self) | Match.objects.filter(team2 = self)
@@ -28,14 +29,14 @@ class Team(models.Model):
         goals_lost = [goal for goal in goals if goal.team != self]
         return len(goals_lost)
 
+    def get_balance(self):
+        return self.get_goals_scored()-self.get_goals_lost()
+
     def get_absolute_url(self):
         return reverse('football:team_detail',args=[self.slug])
 
     def get_players_cunt(self):
         return len(Player.objects.filter(team_id=self.id))
-
-    def get_balance(self)->int:
-        pass
 
     def get_captain(self):
         player = Player.objects.filter(team=self,captain=True).first()
@@ -55,7 +56,7 @@ class Player(models.Model):
 
     def get_goals(self):
         goals = Goal.objects.all().filter(player = self)
-        return goals
+        return len(goals)
 
     def get_hat_tricks(self):
         goals = Goal.objects.all().filter(player = self)
@@ -72,6 +73,9 @@ class Player(models.Model):
 
     def get_absolute_url(self):
         return reverse('football:player_detail',args=[self.id])
+
+    def short_str(self):
+        return f'{self.name[0]}. {self.surname}'
 
     def __str__(self):
         return f'{self.name} {self.surname}'
@@ -110,9 +114,12 @@ class Match(models.Model):
         else:
             return 'draw'
 
+    def already_played(self):
+        return self.date <= date.today()
+
 class Goal(models.Model):
     match = models.ForeignKey(Match,on_delete=models.CASCADE)
-    player = models.CharField(max_length=100)
+    player = models.CharField(null=True, max_length=100)
     team = models.ForeignKey(Team,on_delete=models.CASCADE)
 
     def __str__(self):
@@ -137,6 +144,3 @@ class Challenge(Message):
         Match.objects.create(stadium=self.stadium,date=self.date,team1=self.challenging_team,
                              team2 = self.challenged_team)
 
-
-class MatchReport(Message):
-    match = models.ForeignKey(Match,on_delete=models.CASCADE)

@@ -1,4 +1,24 @@
 {% extends './base.html' %}
 {% block content %}
-
+    <h1>Top strzelcy</h1>
+    <table class="table table-sm table-striped table-bordered w-25">
+        <thead>
+            <tr>
+                <th scope="col">Lp</th>
+                <th scope="col">Druzyna</th>
+                <th scope="col">Zawodnik</th>
+                <th scope="col">Strzelone</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in table %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td class="text-center"><img alt="{{ row.team }}" src="{{ row.team.image.url }}" width="30px" height="30px"></td>
+                    <td>{{ row.player.short_str }}</td>
+                    <td>{{ row.scored }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

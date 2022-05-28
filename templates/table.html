@@ -1,7 +1,47 @@
 {% extends 'base.html' %}
 {% block title %} Tabela {% endblock title %}
 {% block content %}
-{% for t in table %}
-    <h1>{{ t }}</h1>
-{% endfor %}
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+		<table class="table table-image mt-2">
+		  <thead>
+		    <tr class="text-center" style="background-color:#e8ebe9">
+                <th scope="col">Lp</th>
+                <th scope="col">Herb</th>
+                <th scope="col">Nazwa</th>
+                <th scope="col">MR</th>
+                <th scope="col">PKT</th>
+                <th scope="col" class="bg-success">Z</th>
+                <th scope="col" class="bg-warning">R</th>
+                <th scope="col" class="bg-danger">P</th>
+                <th scope="col">BZ</th>
+                <th scope="col">BS</th>
+                <th scope="col">BB</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+          {% for row in table %}
+		    <tr class="text-center">
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>
+                    <img src="{{ row.team.image.url }}" class="img-fluid img-thumbnail" width="60px" height="60px" alt="herb">
+                </td>
+                <td><a class="text-dark text-decoration-none" href ={{ row.team.get_absolute_url }}><p class="fw-bold">{{ row.team }}</p></a></td>
+                <td>{{ row.matches }}</td>
+                <td>{{ row.points }}</td>
+                <td>{{ row.wins }}</td>
+                <td>{{ row.draws }}</td>
+                <td>{{ row.loses }}</td>
+                <td>{{ row.scored }}</td>
+                <td>{{ row.lost }}</td>
+                <td>{{ row.balance }}</td>
+		    </tr>
+
+          {% endfor %}
+		  </tbody>
+		</table>
+    </div>
+  </div>
+</div>
 {% endblock %}
