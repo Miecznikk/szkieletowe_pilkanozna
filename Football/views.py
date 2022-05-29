@@ -1,15 +1,18 @@
 from django.shortcuts import render,get_object_or_404,redirect
-from .models import Team,Player,Position,Message,Invite,Challenge,Match
-from .ext_methods import get_table,send_invite_to_team,top_scorers
+from .models import Team,Player,Message,Invite,Challenge,Match,Goal
+from .ext_methods import get_table,send_invite_to_team,top_scorers,matches_limit
 from django.template.defaultfilters import slugify
 from .forms import RegisterTeamForm,UpdateProfileForm,InvitePlayer,SendMessage,ChallengeForm
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login,logout,authenticate
+from django.contrib.auth.decorators import login_required,permission_required
+from datetime import date
+from django.contrib.auth.models import User,Group
 
+captains_group = Group.objects.get(name='captains')
 
 def home_view(request):
     table = top_scorers()
-    return render(request,'home.html',{'table':table})
+    recent_matches = sorted(Match.objects.filter(status=True),key=lambda x:x.date,reverse=True)[:5]
+    return render(request,'home.html',{'table':table,'matches':recent_matches})
 
 def all_teams(request):
     context = {
@@ -54,16 +57,17 @@ def team_detail(request,slug):
             delete_player = request.POST.get('delete_from_team')
             promote_player = request.POST.get('promote')
             if delete_player is not None:
-                form = None
                 deleted_player = get_object_or_404(Player,id=delete_player)
                 deleted_player.team = None
                 deleted_player.save()
                 return redirect('football:team_detail',slug=team.slug)
             if promote_player is not None:
-                form = None
                 promoting_player = get_object_or_404(Player, id=promote_player)
+                promoting_player_user = get_object_or_404(User,player=promoting_player)
                 promoting_player.captain=True
                 request.user.player.captain=False
+                captains_group.user_set.remove(request.user)
+                captains_group.user_set.add(promoting_player_user)
                 promoting_player.save()
                 request.user.player.save()
                 return redirect('football:team_detail',slug=team.slug)
@@ -91,6 +95,8 @@ def register_team(request):
             player = Player.objects.filter(user = request.user)[0]
             player.team = team
             player.captain = True
+            captains_group.user_set.add(request.user)
+            captains_group.save()
             player.save()
             return redirect('football:home')
     else:
@@ -144,6 +150,9 @@ def messages_view(request):
             return redirect('football:team_detail',slug=team.slug)
         elif challenge_accept is not None:
             challenge = Challenge.objects.filter(id=challenge_accept).first()
+            if matches_limit(challenge.challenging_team,challenge.challenged_team) or challenge.date < date.today():
+                err_msg = 'Coś poszło nietak, być może wyzwanie wygasło'
+                return render(request,'error.html',{'err':err_msg})
             challenge.accept()
             challenge.delete()
             return redirect('football:messages')
@@ -162,13 +171,13 @@ def send_message_view(request,receiver = None):
     return render(request,'messages/send_message.html',{'form':form})
 
 @login_required(login_url='/login')
-def challenge_team(request,challenged_team):
+@permission_required('Football.add_challenge',login_url='/login')
+def challenge_team(request,challenged_team=None):
     if request.method=="POST":
-        form = ChallengeForm(request.POST)
+        form = ChallengeForm(request.POST,team = request.user.player.team)
         if form.is_valid():
             form.instance.sender = request.user.player
             form.instance.challenging_team = request.user.player.team
-
             cd = form.cleaned_data
             team = cd.get('challenged_team')
             form.instance.receiver = team.get_captain()
@@ -177,16 +186,18 @@ def challenge_team(request,challenged_team):
             form.save()
             return redirect('football:team_detail',slug=request.user.player.team.slug)
     else:
-        form = ChallengeForm(initial={'challenged_team':challenged_team})
+        form = ChallengeForm(team=request.user.player.team,initial={'challenged_team':challenged_team})
     return render(request,'match/challenge.html',{'form':form})
 
 @login_required(login_url='/login')
+@permission_required('Football.add_goal',login_url='/login')
 def post_score_view(request,id):
     match = Match.objects.filter(id=id).first()
     players1 = Player.objects.filter(team= match.team1)
     players2 = Player.objects.filter(team = match.team2)
-
-    if request.method=="POST" and not match.status:
+    if request.user.player not in players1 and request.user.player not in players2:
+        return redirect('football:home')
+    if request.method=="POST" and not match.status and match.already_played():
         for player in players1 | players2:
             n_of_goals=int(request.POST.get(str(player.id)))
             if n_of_goals>0:
@@ -217,3 +228,32 @@ def team_matches(request):
     my_matches = Match.objects.filter(team1 = request.user.player.team) \
                  | Match.objects.filter(team2 = request.user.player.team)
     return render(request,'match/team_matches.html',{'matches':my_matches})
+
+def all_matches(request):
+    finished_matches = sorted(Match.objects.filter(status=True),key=lambda x:x.date,reverse=True)
+    upcoming_matches = sorted(Match.objects.filter(status=False),key=lambda x:x.date)
+    return render(request,'match/all_matches.html',{
+        'finished':finished_matches,
+        'upcoming':upcoming_matches
+    })
+
+def match_detail(request,id):
+
+    class Scorer:
+        scorer = None
+        count = 0
+
+    match = Match.objects.filter(id=id).first()
+    goals_scored = Goal.objects.filter(match=match)
+    scorers = [goal.player for goal in goals_scored]
+    ind_scorers = set(scorers)
+    scorers_w_count = []
+    for scorer in ind_scorers:
+        swc = Scorer()
+        swc.scorer=scorer
+        swc.count = scorers.count(scorer)
+        scorers_w_count.append(swc)
+    return render(request,'match/match_detail.html',{
+        'match':match,
+        'scorers':sorted(scorers_w_count,reverse=True,key=lambda x:x.count),
+    })

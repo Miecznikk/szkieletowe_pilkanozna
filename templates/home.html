@@ -1,24 +1,50 @@
 {% extends './base.html' %}
 {% block content %}
-    <h1>Top strzelcy</h1>
-    <table class="table table-sm table-striped table-bordered w-25">
-        <thead>
-            <tr>
-                <th scope="col">Lp</th>
-                <th scope="col">Druzyna</th>
-                <th scope="col">Zawodnik</th>
-                <th scope="col">Strzelone</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in table %}
-                <tr>
-                    <th scope="row">{{ forloop.counter }}</th>
-                    <td class="text-center"><img alt="{{ row.team }}" src="{{ row.team.image.url }}" width="30px" height="30px"></td>
-                    <td>{{ row.player.short_str }}</td>
-                    <td>{{ row.scored }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="d-flex flex-row w-100">
+        <div class="ms-4">
+            <h1>Top strzelcy</h1>
+            <table class="table table-sm table-striped table-bordered w-100">
+                <thead>
+                    <tr>
+                        <th scope="col">Lp</th>
+                        <th scope="col">Druzyna</th>
+                        <th scope="col">Zawodnik</th>
+                        <th scope="col">Strzelone</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in table %}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td class="text-center"><img alt="{{ row.team }}" src="{{ row.team.image.url }}" width="30px" height="30px"></td>
+                            <td><a class="text-decoration-none text-dark fw-bold" href="{{ row.player.get_absolute_url }}">{{ row.player.short_str }}</a></td>
+                            <td>{{ row.scored }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="ms-4">
+            <h1>Ostatnie mecze</h1>
+            <table class="table table-striped w-100 table-bordered">
+                <thead>
+                    <tr class="text-center">
+                        <th scope="col"> VS </th>
+                        <th scope="col">Wynik</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for match in matches %}
+                        <tr>
+                            <td><a class="text-decoration-none fw-bold text-dark" href="{% url 'football:match_detail' match.id %}">{{ match.team1 }} VS {{ match.team2 }}</a></td>
+                            <td>{{ match.get_score }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        <a class="btn btn-sm btn-primary" href="{% url 'football:all_matches' %}">Wszystkie mecze</a>
+        </div>
+    </div>
+
+
 {% endblock %}

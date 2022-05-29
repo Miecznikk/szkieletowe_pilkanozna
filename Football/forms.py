@@ -1,10 +1,7 @@
 from django import forms
 import datetime
-from django.utils import timezone
 from .models import Player,Team,Message,Challenge
-from django.contrib.auth.forms import UserCreationForm,AuthenticationForm
-from django.contrib.auth.models import User
-from django.db.models import Q
+from .ext_methods import matches_limit
 
 class SendMessage(forms.ModelForm):
     receiver = forms.ModelChoiceField(required=True,label='Odbiorca',
@@ -32,6 +29,10 @@ class DateInput(forms.DateInput):
     input_type = 'date'
 
 class ChallengeForm(forms.ModelForm):
+    def __init__(self,*args,**kwargs):
+        self.team = kwargs.pop('team')
+        super(ChallengeForm,self).__init__(*args,**kwargs)
+
     class Meta:
         model = Challenge
         fields=['stadium','date','challenged_team']
@@ -47,7 +48,10 @@ class ChallengeForm(forms.ModelForm):
     def clean(self):
         cd=self.cleaned_data
         if cd.get('date') <= datetime.date.today():
-            raise forms.ValidationError('Pomiędzy dniem dzisiejszym a meczowym musi być co najmniej jeden dzień różnicy')
+            raise forms.ValidationError('Pomiędzy dniem dzisiejszym a meczowym musi '
+                                        'być co najmniej jeden dzień różnicy')
+        if matches_limit(self.team,cd.get('challenged_team')):
+            raise forms.ValidationError('Rozegrałeś już 2 mecze z tą drużyną!')
         return cd
 
 class InvitePlayer(forms.Form):

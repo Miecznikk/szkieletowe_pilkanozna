@@ -107,9 +107,9 @@ class Match(models.Model):
 
     def get_winner(self):
         score = self.get_score().split(':')
-        if score[0] > score[1]:
+        if int(score[0]) > int(score[1]):
             return self.team1
-        elif score[0] < score[1]:
+        elif int(score[0]) < int(score[1]):
             return self.team2
         else:
             return 'draw'

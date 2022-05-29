@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %} {{ match }} {% endblock %}
+{% block content %}
+    <h2><img src="{{ match.team1.image.url }}" width="50px" height="50px" alt="team1img">
+    {{ match }}
+        <img src="{{ match.team2.image.url }}" width="50px" height="50px" alt="team2img"></h2>
+        <h4>{{ match.date }}, {{ match.stadium }}</h4>
+    <h3>Strzelcy: </h3>
+    {% for scorer in scorers %}
+        <p>{{ scorer.scorer }} : {{ scorer.count }}</p>
+    {% endfor %}
+{% endblock %}

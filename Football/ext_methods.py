@@ -29,12 +29,12 @@ def get_table():
         draws = 0
         loses = 0
 
-    teams = Team.objects.all()
+    teams = Team.objects.filter()
     rows = []
     for team in teams:
         tr = table_row()
         tr.team = team
-        matches = Match.objects.filter(team1=team) | Match.objects.filter(team2=team)
+        matches = Match.objects.filter(status=True,team1=team) | Match.objects.filter(status=True,team2=team)
         tr.matches = len(matches)
         for match in matches:
             if match.get_winner() == team:
@@ -51,6 +51,9 @@ def get_table():
         rows.append(tr)
     return sorted(rows,key=lambda x:(x.points,x.balance),reverse=True)
 
+def matches_limit(team1,team2):
+    query = Match.objects.filter(team1=team1,team2=team2) | Match.objects.filter(team1=team2,team2=team1)
+    return len(query) >= 2
 
 def get_teams(request):
     return {'teams' : Team.objects.all()}
