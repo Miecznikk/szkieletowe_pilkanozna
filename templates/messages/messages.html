@@ -1,70 +1,72 @@
 {% extends 'base.html' %}
 {% block title %} Wiadomości {% endblock title %}
 {% block content %}
-{% if invites %}
-<h1>Zaproszenia</h1>
-{% endif %}
-{% for i in invites %}
-    <div class="card mt-2">
-        <div class="card-header">
-            Zaproszenie
-        </div>
-        <div class="card-body">
-            <p class="card-text">{{ i.description }}</p>
-            <div class="d-flex flex-row">
-                <form method = "POST">
-                    {% csrf_token %}
-                    <button type="submit" name = "accept" value="{{ i.id }}" class="btn btn-primary">Przyjmij</button>
-                </form>
-                <form method = "POST">
-                    {% csrf_token %}
-                    <button type="submit" name="decline" value="{{ i.id }}" class="btn btn-danger ms-2">Usuń</button>
-                </form>
-            </div>
+    <div class="container">
+            {% if invites %}
+            <h1 class="text-center">Zaproszenia</h1>
+            {% endif %}
+            {% for i in invites %}
+                <div class="card mt-2">
+                    <div class="card-header">
+                        Zaproszenie
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ i.description }}</p>
+                        <div class="d-flex flex-row">
+                            <form method = "POST">
+                                {% csrf_token %}
+                                <button type="submit" name = "accept" value="{{ i.id }}" class="btn btn-primary">Przyjmij</button>
+                            </form>
+                            <form method = "POST">
+                                {% csrf_token %}
+                                <button type="submit" name="decline" value="{{ i.id }}" class="btn btn-danger ms-2">Usuń</button>
+                            </form>
+                        </div>
 
-        </div>
-    </div>
-{% endfor %}
-{% if messages %}
-<h1>Wiadomości</h1>
-{% endif %}
-{% for m in messages %}
-    <div class="card mt-2">
-        <div class="card-header">
-            Wiadomość od {{ m.sender }}
-        </div>
-        <div class="card-body">
-            <p class="card-text">{{ m.description }}</p>
-            <div class="d-flex flex-row">
-                <form method="post">
-                    {% csrf_token %}
-                    <a class="btn btn-primary" href="{% url 'football:send_message' m.sender.id %}">Odpowiedz</a>
-                    <button type="submit" name="decline" value="{{ m.id }}" class="btn btn-danger">Usuń</button>
-                </form>
-            </div>
+                    </div>
+                </div>
+            {% endfor %}
+            {% if messages %}
+            <h1 class="text-center">Wiadomości</h1>
+            {% endif %}
+            {% for m in messages %}
+                <div class="card mt-2">
+                    <div class="card-header">
+                        Wiadomość od {{ m.sender }}
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ m.description }}</p>
+                        <div class="d-flex flex-row">
+                            <form method="post">
+                                {% csrf_token %}
+                                <a class="btn btn-primary" href="{% url 'football:send_message' m.sender.id %}">Odpowiedz</a>
+                                <button type="submit" name="decline" value="{{ m.id }}" class="btn btn-danger">Usuń</button>
+                            </form>
+                        </div>
 
-        </div>
-    </div>
-{% endfor %}
-    {% if challenges %}
-    {% for c in challenges %}
-        <div class="card mt-2">
-        <div class="card-header">
-            Wyzwanie od {{ c.sender }}
-        </div>
-        <div class="card-body">
-            <p class="card-text">{{ c.description }}</p>
-            <div class="d-flex flex-row">
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" name="challenge" value="{{ c.id }}" class="btn btn-success">Przyjmij</button>
-                    <button type="submit" name="decline" value="{{ c.id }}" class="btn btn-danger">Usuń</button>
-                </form>
-            </div>
+                    </div>
+                </div>
+            {% endfor %}
+                {% if challenges %}
+                {% for c in challenges %}
+                    <div class="card mt-2">
+                    <div class="card-header">
+                        Wyzwanie od {{ c.sender }}
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ c.description }}</p>
+                        <div class="d-flex flex-row">
+                            <form method="post">
+                                {% csrf_token %}
+                                <button type="submit" name="challenge" value="{{ c.id }}" class="btn btn-success">Przyjmij</button>
+                                <button type="submit" name="decline" value="{{ c.id }}" class="btn btn-danger">Usuń</button>
+                            </form>
+                        </div>
 
-        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+                <a href="{% url 'football:send_message' %}" class="btn btn-primary mt-2">Wyślij wiadomość</a>
     </div>
-    {% endfor %}
-    {% endif %}
-    <a href="{% url 'football:send_message' %}" class="btn btn-primary mt-2">Wyślij wiadomość</a>
 {% endblock %}

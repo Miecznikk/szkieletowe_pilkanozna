@@ -2,13 +2,27 @@
 
 {% block title %} Moje mecze {% endblock %}
 {% block content %}
-{% for match in matches %}
-    {% if match.status %}
-        <h3>{{ match.team1 }} VS {{ match.team2 }} : {{ match.get_score }}</h3>
-    {% elif not match.already_played %}
-        <h3>{{ match.team1 }} VS {{ match.team2 }} - {{ match.date }}, boisko: {{ match.stadium }}</h3>
-    {% else %}
-        <h3>{{ match.team1 }} VS {{ match.team2 }} <a class="btn btn-primary" href="{% url 'football:post_score' match.id %}">Wprowadz wynik</a></h3>
-    {% endif %}
-{% endfor %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mt-5">
+            <table class="table table-hover table-bordered text-center rounded">
+                    <tbody>
+                        {% for match in matches %}
+                            <tr class="">
+                                {% if match.status %}
+                                    <td>{{ match.team1 }} VS {{ match.team2 }}</td>
+                                    <td>{{ match.get_score }}</td>
+                                {% elif not match.already_played %}
+                                    <td>{{ match.team1 }} VS {{ match.team2 }} - {{ match.date }}, boisko: {{ match.stadium }}</td>
+                                    <td>{{ match.stadium }</td>
+                                {% else %}
+                                    <td>{{ match.team1 }} VS {{ match.team2 }} <a class="btn btn-primary" href="{% url 'football:post_score' match.id %}">Wprowadz wynik</a></td>
+                                    </tr>
+                                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 {% endblock %}

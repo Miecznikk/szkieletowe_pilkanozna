@@ -1,9 +1,11 @@
 {% extends 'base.html' %}
 {% block title %} Zarejestruj drużynę {% endblock title %}
 {% block content %}
-<form method = "POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Zarejestruj">
-</form>
+     <div class="container show">
+            <form class="mx-auto d-block mt-5 text-center" method="post" enctype="multipart/form-data" style="width: 300px;">
+                {% csrf_token %}
+                {{ form.as_p }}
+                 <button type="button" class="btn btnn btnn3 mx-auto d-block" type="submit">Zajestruj</button>
+            </form>
+    </div>
 {% endblock %}

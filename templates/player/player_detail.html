@@ -1,20 +1,59 @@
 {% extends 'base.html' %}
 {% block title %} {{ player }} {% endblock title %}
 {% block content %}
-    <div>
-        <img src="{{ player.image.url }}">
-        <p>Imie i nazwisko: {{ player.name }} {{ player.surname }}</p>
-        <p>Bramki: {{ player.get_goals }}</p>
-        <p>Hat-tricki: {{ player.get_hat_tricks }}</p>
-        <p>Pozycja: {{ player.position }}</p>
-        <p>Nr koszulki: {{ player.shirt_number }}</p>
-        <p>Drużyna: <a class="fw-bold text-dark text-decoration-none" href="{{ player.team.get_absolute_url }}">{{ player.team }}</a> </p>
+    <div class="container">
+        <div class="row m-1 bg-image  rounded " style="background-image: url(../../media/images/Stadion.jpg); max-width: 100%; height: 250px;">
+            <div class="col-12 ">
+                <img class="rounded-circle mt-3 mx-auto d-block img-fluid" style="width: 130px; height: 180px;" src="{{ player.image.url }}">
+                <h3 class="text-center text-white" style="font-size: 20px;">{{ player.name }} {{ player.surname }}</h3>
+            </div>
+        </div>
+        <div class="row"style="font-size: 15px;">
+        <div class="col-sx-12 col-md-4 col-lg-3">
+            <p class="text-center tracking-in-expand">Bramki</p>
+            <img style="width: 50px;height: 50px" class="mx-auto d-block  grow " src="../../media/images/pilka.png">
+            <p class="fw-bold text-center mt-2 tracking-in-expand ">{{ player.get_goals }}</p>
+            <hr class="bg-dark border-2 border-top border-dark">
+        </div>
+        <div class="col-sx-12  col-md-4 col-lg-2">
+            <p class="text-center tracking-in-expand">Hat-tricki</p>
+            <img style="width: 50px;height: 50px" class="mx-auto d-block grow " src="../../media/images/star.png">
+            <p class="fw-bold text-center mt-2 tracking-in-expand ">{{ player.get_hat_tricks }}</p>
+            <hr class="bg-dark border-2 border-top border-dark">
+        </div>
+        <div class="col-sx-12  col-md-4 col-lg-2">
+             <p class="text-center tracking-in-expand">Pozycja</p>
+            <img style="width: 50px;height: 50px" class="mx-auto d-block grow " src="../../media/images/prof.png">
+            <p class="fw-bold text-center mt-2 tracking-in-expand ">{{ player.position }}</p>
+            <hr class="bg-dark border-2 border-top border-dark">
+        </div>
+        <div class="col-sx-12  col-md-6 col-lg-2">
+            <p class="text-center tracking-in-expand">Nr koszulki</p>
+            <img style="width: 50px;height: 50px" class="mx-auto d-block grow" src="../../media/images/shirt.png">
+            <p class="fw-bold text-center mt-2 tracking-in-expand ">{{ player.shirt_number }}</p>
+            <hr class="bg-dark border-2 border-top border-dark">
+        </div>
+        <div class="col-sx-12  col-md-6 col-lg-3">
+            <p class="text-center tracking-in-expand">Drużyna</p>
+            <img style="width: 50px;height: 50px" class="mx-auto d-block grow" src="../../media/images/team.png">
+            <p class="mt-2 text-center tracking-in-expand "><a class=" fw-bold text-dark text-decoration-none " href="{{ player.team.get_absolute_url }}">{{ player.team }}</a> </p>
+            <hr class="bg-dark border-2 border-top border-dark">
+        </div>
+        </div>
+        <div class="row m-1 bg-image bg-body rounded d-sm-block d-none d-sm-none d-md-block" style="background-image: url(../../media/images/Stadion2.jpg); height: 15vw;">
+        </div>
+        <div class="row">
+            <div class="col-sx-12 text-center button"><a class = "btnn btnn3 fw-bold scale-in-center " href="{% url 'football:send_message' player.id %}">Napisz do mnie!</a></div>
+            <div class="col-4 text-center">
+                {% if user.player.captain and player.team == None %}
+                    <form method="post">
+                        {% csrf_token %}
+                <button class="btnn btnn3" type="submit">Zaproś do drużyny</button>
+                    </form>
+                {% endif %}
+            </div>
+            <div class="col-sx-12"></div>
+
+        </div>
     </div>
-    {% if user.player.captain and player.team == None %}
-    <form method="post">
-    {% csrf_token %}
-        <button class="btn btn-outline-primary" type="submit">Zaproś do drużyny</button>
-    </form>
-    {% endif %}
-    <a class = "btn btn-primary" href="{% url 'football:send_message' player.id %}">Wyślij wiadomość</a>
 {% endblock %}

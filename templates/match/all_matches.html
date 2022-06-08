@@ -1,48 +1,50 @@
 {% extends 'base.html' %}
 {% block title %} Wszystkie mecze {% endblock %}
 {% block content %}
-    <div class="container-fluid">
-        <div>
-            <h2>Rozegrane mecze</h2>
-            <table class="table w-50">
-                <thead>
-                    <tr>
-                        <th scope="col">VS</th>
-                        <th scope="col">Data</th>
-                        <th scope="col">Wynik</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for match in finished %}
+    <div class="container">
+        <div class="row overflow-hidden">
+            <div>
+                <h2 class="text-center">Rozegrane mecze</h2>
+                <table class="table table-hover text-center mt-3">
+                    <thead>
                         <tr>
-                            <td><a class="text-decoration-none fw-bold text-dark" href="{% url 'football:match_detail' match.id %}">{{ match.team1 }} VS {{ match.team2 }}</a></td>
-                            <td>{{ match.date }}</td>
-                            <td>{{ match.get_score }}</td>
+                            <th scope="col">VS</th>
+                            <th scope="col">Data</th>
+                            <th scope="col">Wynik</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div>
-            <h2>Nadchodzące mecze</h2>
-            <table class="table w-50">
-                <thead>
-                    <tr>
-                        <th scope="col">VS</th>
-                        <th scope="col">Data</th>
-                        <th scope="col">Stadion</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for match in upcoming %}
+                    </thead>
+                    <tbody>
+                        {% for match in finished %}
+                            <tr>
+                                <td><a class="text-decoration-none fw-bold text-dark" href="{% url 'football:match_detail' match.id %}">{{ match.team1 }} VS {{ match.team2 }}</a></td>
+                                <td>{{ match.date }}</td>
+                                <td>{{ match.get_score }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <h2 class="text-center">Nadchodzące mecze</h2>
+                <table class="table table-hover text-center mt-5">
+                    <thead>
                         <tr>
-                            <td><a class="text-decoration-none fw-bold text-dark" href="{% url 'football:match_detail' match.id %}">{{ match.team1 }} VS {{ match.team2 }}</a></td>
-                            <td>{{ match.date }}</td>
-                            <td>{{ match.stadium }}</td>
+                            <th scope="col">VS</th>
+                            <th scope="col">Data</th>
+                            <th scope="col">Stadion</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for match in upcoming %}
+                            <tr>
+                                <td><a class="text-decoration-none fw-bold text-dark" href="{% url 'football:match_detail' match.id %}">{{ match.team1 }} VS {{ match.team2 }}</a></td>
+                                <td>{{ match.date }}</td>
+                                <td>{{ match.stadium }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 {% endblock %}

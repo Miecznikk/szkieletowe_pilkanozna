@@ -1,21 +1,21 @@
 {% extends 'base.html' %}
 {% block title %} Drużyny {% endblock title %}
 {% block content %}
-<div class="album mt-2">
+<div class="container show">
 
 
           <div class="row">
 
             {% for team in teams %}
-            <div class="col">
-              <div class="card ms-3 mt-3 box-shadow" style="width:18rem">
-                <img class="card-img-top" src="{{ team.image.url }}" alt="{{ team.name }}" width="150px" height = "250px" >
+            <div class="col-sm-12 col-md-6 col-lg-4 show">
+              <div class="card mt-3 box-shadow mx-auto d-block  rounded groww" style="width:14rem">
+                <img class="card-img-top" src="{{ team.image.url }}" alt="{{ team.name }}" width="200px" height = "200px" >
                 <div class="card-body">
-                  <h3 class="card-text">{{ team.name }}</h3>
-                    <p class = "card-text">Zawodnicy: {{ team.get_players_cunt }}</p>
+                  <h3 class="card-text text-center">{{ team.name }}</h3>
+                    <p class = " card-text text-center ">Zawodnicy: {{ team.get_players_cunt }}</p>
                   <div class="d-flex justify-content-between align-items-center">
                     <div class="btn-group">
-                      <button type="button" class="btn btn-sm btn-outline-secondary">
+                      <button type="button" class="btn btnn btnn3"  style = "position:relative; right:10px; width: 210px;">
                           <a class="text-decoration-none text-dark" href="{{ team.get_absolute_url }}">Szczegóły</a>
                       </button>
                     </div>
