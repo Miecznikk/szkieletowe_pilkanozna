@@ -14,7 +14,7 @@ def top_scorers():
         tr.team=player.team
         tr.scored=player.get_goals()
         table.append(tr)
-    return sorted(table,reverse=True,key=lambda x:x.scored)[:6]
+    return sorted(table,reverse=True,key=lambda x:x.scored)[:5]
 
 def get_table():
 

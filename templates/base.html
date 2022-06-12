@@ -69,7 +69,7 @@
 
                         </div>
                     {% if user.is_authenticated %}
-                        <span class="me-2 d-sm-block d-none d-sm-none d-md-block ">Witaj !</span><button class = "btn btn-outline-danger me-2 d-sm-block d-none d-sm-none d-md-block p-1"><a class="text-decoration-none text-dark" href = {% url "logout" %}>Wyloguj</a></button>
+                        <span class="me-2 d-sm-block d-none d-sm-none d-md-block ">Witaj {{ user }}!</span><button class = "btn btn-outline-danger me-2 d-sm-block d-none d-sm-none d-md-block p-1"><a class="text-decoration-none text-dark" href = {% url "logout" %}>Wyloguj</a></button>
                         {% if user.player %}
                         <div class="dropdown d-sm-block d-none d-sm-none d-md-block">
                             <a class="dropdown-toggle btn me-2 btn-outline-secondary text-dark dropdown-toggle p-1" href="#" id="id3" role="button"
@@ -92,7 +92,7 @@
                         </div>
                         {% endif %}
                         <button class="btn btn-outline-success me-2 d-sm-block d-none d-sm-none d-md-block p-1 ">
-                            <a class="text-decoration-none text-dark " href = "{% url "football:register_team" %} ">Zgłoś</a>
+                            <a class="text-decoration-none text-dark " href = "{% url "football:register_team" %} ">Zgłoś Drużynę</a>
                         </button>
 
                     {% else %}

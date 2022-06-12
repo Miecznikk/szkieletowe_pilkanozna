@@ -8,13 +8,13 @@
         <h2 class="fst-italic">{{ match.team1 }}</h2>
         {% for player in players1 %}
             <label>{{ player }}</label>
-            <input type="number" name="{{ player.id }}" value="0" min="0" max="100">
+            <input class ="mt-2" type="number" name="{{ player.id }}" value="0" min="0" max="100">
             <br/>
         {% endfor %}
         <h2 class="fst-italic mt-5" >{{ match.team2 }}</h2>
         {% for player in players2 %}
             <label>{{ player }}</label>
-            <input type="number" name="{{ player.id }}" value="0" min="0" max="100">
+            <input class ="mt-2" type="number" name="{{ player.id }}" value="0" min="0" max="100">
             <br/>
         {% endfor %}
     <button type="submit" class="btn btnn btnn3 mx-auto d-block" >Wprowadz</button>

@@ -43,12 +43,14 @@
         <div class="row m-1 bg-image bg-body rounded d-sm-block d-none d-sm-none d-md-block" style="background-image: url(../../media/images/Stadion2.jpg); height: 15vw;">
         </div>
         <div class="row">
+            {% if user.player != player %}
             <div class="col-sx-12 text-center button"><a class = "btnn btnn3 fw-bold scale-in-center " href="{% url 'football:send_message' player.id %}">Napisz do mnie!</a></div>
+            {% endif %}
             <div class="col-4 text-center">
                 {% if user.player.captain and player.team == None %}
                     <form method="post">
                         {% csrf_token %}
-                <button class="btnn btnn3" type="submit">Zaproś do drużyny</button>
+                    <button class="btnn btnn3" type="submit">Zaproś do drużyny</button>
                     </form>
                 {% endif %}
             </div>

@@ -52,6 +52,8 @@ class ChallengeForm(forms.ModelForm):
                                         'być co najmniej jeden dzień różnicy')
         if matches_limit(self.team,cd.get('challenged_team')):
             raise forms.ValidationError('Rozegrałeś już 2 mecze z tą drużyną!')
+        if cd.get('challenged_team') == self.team:
+            raise forms.ValidationError('Nie możesz rzucić wyzwania samemu sobie!')
         return cd
 
 class InvitePlayer(forms.Form):

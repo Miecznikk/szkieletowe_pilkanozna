@@ -4,7 +4,7 @@
     <div class="container text-center overflow-hidden">
         <div class="row">
             <div class="d-flex justify-content-between mt-2">
-            <img class=" rounded-circle" src="{{ match.team1.image.url }}"style="width: 160px;height: 150px;" >
+                <img class=" rounded-circle" src="{{ match.team1.image.url }}"style="width: 160px;height: 150px;" >
              <img class=" rounded-circle" src="{{ match.team2.image.url }}" style="width: 160px; height: 150px;" >
         </div>
             <h1>{{ match }}</h1>
@@ -19,5 +19,7 @@
             {% endfor %}
 
         </tbody>
+        </table>
         </div>
+    </div>
 {% endblock %}

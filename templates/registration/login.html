@@ -6,8 +6,7 @@
             <form class="mx-auto d-block mt-5 text-center" method="post" enctype="multipart/form-data" style="width: 300px;">
                 {% csrf_token %}
                 {{ form|crispy }}
-                 <button type="button" class="btn btnn btnn3 mx-auto d-block" type="submit">Zastosuj</button>
-{#                <input class="btn btnn btnn3" type="submit" value="Zastosuj">#}
+                 <button class="btn btnn btnn3 mx-auto d-block" type="submit">Zaloguj</button>
                 <p>Nie masz konta? Zarejestruj się <a href="{% url "users:register" %}" class="text-decoration-none text-red">tutaj</a></p>
             </form>
     </div>

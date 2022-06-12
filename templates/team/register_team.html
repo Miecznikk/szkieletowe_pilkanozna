@@ -2,10 +2,11 @@
 {% block title %} Zarejestruj drużynę {% endblock title %}
 {% block content %}
      <div class="container show">
+        {% load crispy_forms_tags %}
             <form class="mx-auto d-block mt-5 text-center" method="post" enctype="multipart/form-data" style="width: 300px;">
                 {% csrf_token %}
-                {{ form.as_p }}
-                 <button type="button" class="btn btnn btnn3 mx-auto d-block" type="submit">Zajestruj</button>
+                {{ form|crispy }}
+                 <button class="btn btnn btnn3 mx-auto d-block" type="submit">Zajestruj</button>
             </form>
     </div>
 {% endblock %}
